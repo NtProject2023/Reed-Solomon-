@@ -16,3 +16,37 @@ def egcd(a,b):
 
 print(egcd(8,5))
 
+def inverseModn(b,n):
+    g,s,t = gmpy2.gcdext(b,n)
+    if(s<0):
+        s = s+n
+    return s
+
+def PreCompute(numbers):
+    sz = len(numbers)
+    product=1
+    for i in range(0,sz):
+        product = product*numbers[i]
+    partialProducts = []
+    for i in range(0,sz):   
+        partialProducts.append(gmpy2.f_div(product,numbers[i]))
+    return product,partialProducts
+
+def CRT(remainders,numbers):
+    product,partialProducts = PreCompute(numbers)
+    sz = len(numbers)
+    a=0
+    # print(partialProducts)
+    for i in range(0,sz):
+        b_i = gmpy2.f_mod(partialProducts[i],numbers[i])
+        t_i = inverseModn(b_i,numbers[i])
+        # print(b_i,numbers[i],t_i)
+        e_i = gmpy2.f_mod(partialProducts[i]*t_i,product)
+        a = gmpy2.add(a,e_i*remainders[i])
+    a = gmpy2.f_mod(a,product)
+    return a
+
+num = [3,4,5]
+rem = [2,3,1]
+
+print(CRT(rem,num));        
