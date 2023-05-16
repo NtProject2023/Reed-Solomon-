@@ -14,7 +14,7 @@ def egcd(a,b):
         a, b = b, rem
     return s,t,r
 
-print(egcd(8,5))
+print(egcd(280,480))
 
 def inverseModn(b,n):
     g,s,t = gmpy2.gcdext(b,n)
