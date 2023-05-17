@@ -245,7 +245,7 @@ def ReedSolomonRecieve(residueRecieved,l):
            break
     if(r_list[i]%t_list[i]==0):
         # print(r_list[i]/t_list[i])
-        a = r_list[i]/t_list[i]
+        a = r_list[i]//t_list[i]
         print(f'Conctructed message = {a}')
         # return True
     else:
@@ -307,12 +307,12 @@ def testCases():
     
     i = 0  
     while(i<len(input)):
+        print(f'\nTest Case: {i//7+1}')
         u = input[i]
         print(f'u = {u}')
         u = gmpy2.mpfr(u)
         M = input[i+1]
         print(f'M = {M}')
-        print(M)
         M= G(M)
 
         GlobalSetup(u,M)

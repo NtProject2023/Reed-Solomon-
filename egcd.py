@@ -218,6 +218,22 @@ def maxProd(count):
         prod = prod*kPrimes[i]
     return prod
 
+def reverse_binary_search(arr, target):
+    low = G(0)
+    high = G(len(arr) - 1)
+
+    while low <= high:
+        mid = G((low + high) // 2)
+        if arr[mid] < target:
+            high = mid-1
+        else:
+            low = mid + 1
+    
+    if high >= G(0):
+            return high+1
+    else:
+        return G(0)
+
 def ReedSolomonRecieve(residueRecieved,l):
     global M,kPrimes
     b = CRT(residueRecieved,kPrimes)
@@ -238,10 +254,14 @@ def ReedSolomonRecieve(residueRecieved,l):
         P = P*kPrimes[i]
     r = M * P
     t = P
-    for i in range(0,len(r_list)):
-        if(r_list[i]<r):
-           index =i
-           break
+    
+    i = reverse_binary_search(r_list,r)
+    print(i,len(r_list),len(t_list))
+    # for i in range(0,len(r_list)):
+    #     if(r_list[i]<r):
+    #        index =i
+    #        break
+    print(i)
     if(r_list[i]%t_list[i]==0):
         # print(r_list[i]/t_list[i])
         a = r_list[i]/t_list[i]
@@ -250,6 +270,7 @@ def ReedSolomonRecieve(residueRecieved,l):
     else:
         print("couldn't reconstruct the message")
         # return False
+    
 
 def Reed():
     global u,M
