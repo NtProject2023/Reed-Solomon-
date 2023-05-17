@@ -17,7 +17,7 @@ def power(a,n):   #repeatd squaring algorithm
     return p
 
 def G(x):
-    return gmpy2.mpz(str(x))
+    return gmpy2.mpz(str(int(x)))
 
 def bin_egcd(a,b):
     a,b=G(a),G(b)
@@ -53,9 +53,17 @@ print(bin_egcd(280,480))
 
 def inverseModn(b,n):
     g,s,t = bin_egcd(b,n)
-    # if(s<0):
-    #     s = s+n
-    return t
+    
+    if b >= n:
+        if(s<0):
+            return s+n
+        else:
+            return s
+    else:
+        if t<0:
+            return t+n
+        else:
+            return t
 
 def PreCompute(numbers):
     sz = len(numbers)
@@ -64,30 +72,33 @@ def PreCompute(numbers):
         product = product*numbers[i]
     partialProducts = []
     for i in range(0,sz):   
-        partialProducts.append(gmpy2.f_div(product,numbers[i]))
+        partialProducts.append(product//numbers[i])
     return product,partialProducts
 
 def CRT(remainders,numbers):
     product,partialProducts = PreCompute(numbers)
     sz = len(numbers)
     a=0
-    # print(partialProducts)
+    e=[]
+    print(partialProducts)
     for i in range(0,sz):
         b_i = partialProducts[i]%numbers[i]
         t_i = inverseModn(b_i,numbers[i])
         # print(b_i,numbers[i],t_i)
-        e_i = (partialProducts[i]*t_i)%(numbers[i])
+        e_i = (partialProducts[i]*t_i)
+        e.append(e_i)
         a = a + e_i*remainders[i]
         print(f'b_i- {b_i},t_i- {t_i},e_i- {e_i} i- {i}')
         print(f'value of a- {a} at i -{i}')
     a = a%product
+    print(e)
     print(f'value of a - {a}')
     return a
 
-num = [3,4,5]
-rem = [2,3,1]
+# num = [G(5),G(7)]
+# rem = [G(2),G(3)]
 
-print(CRT(rem,num));        
+# print(CRT(rem,num));        
 
 def egcd(a,b):
     s,t,r=[],[],[]
@@ -101,26 +112,12 @@ def egcd(a,b):
         x,prevx = prevx - quo*x, x
         y, prevy = prevy - quo*y, y
         a, b = b, rem
-    return s,t,r
+    if a>=b:
+        return s,t,r
+    else:
+        return t,s,r
 
 print(egcd(280,480))
-
-
-k=G(10) 
-
-def GlobalSetup(u,M):
-    global kPrimes
-    u = gmpy2.mpfr(u)
-    M= G(M)
-    countOfPrimes=0
-    kPrimes=[]
-    rand_state = gmpy2.random_state()
-    while(countOfPrimes<k):
-        r = gmpy2.mpz_random(rand_state, 2**7)
-        if(gmpy2.is_prime(r) and r not in kPrimes):
-            kPrimes.append(r)
-            countOfPrimes=countOfPrimes+1
-    print(f'kPrimes- {kPrimes}')
 
 a = 100
 u = 0.4
@@ -130,23 +127,31 @@ M = 1000
 def Transmit(residues):
     global u,k,kPrimes
     rand_state = gmpy2.random_state()
-    rounded = gmpy2.rint_floor(u*k)
-    rounded = int(rounded)
-    rounded = G(rounded)
-    l = gmpy2.mpz_random(rand_state,rounded)
+    rounded = gmpy2.rint_ceil(u*k)
+    rounded = G(int(rounded))
+    print("crossed rounded")
+    l=G(0)
+    if(rounded!=0):
+        l = gmpy2.mpz_random(rand_state,rounded)
+    print("crossed l")
     corruptedIndices =[]
     countOfCorrupted = 0
     residueRecieved = []
     while(countOfCorrupted<l):
+        print("entered while")
+        print(corruptedIndices)
+        print(l)
         r = gmpy2.mpz_random(rand_state, k)
         if(r not in corruptedIndices):
             corruptedIndices.append(r)
             countOfCorrupted = countOfCorrupted+1
+    print("crossed")
     for i in range(0,k):
         if(i in corruptedIndices):
-            b_i = gmpy2.mpz_random(rand_state,kPrimes[i]-1)
+            b_i = gmpy2.mpz_random(rand_state,kPrimes[i])
+            print(b_i,residues[i],kPrimes[i])
             while(b_i == residues[i]):
-                b_i = gmpy2.mpz_random(rand_state,kPrimes[i]-1)
+                b_i = gmpy2.mpz_random(rand_state,kPrimes[i])
         else:
             b_i = residues[i]
         residueRecieved.append(b_i)
@@ -167,7 +172,51 @@ def ReedSolomonSend(a):
     # Transmit(residues)
 
 # print(ReedSolomonSend(a))
+def GlobalSetup(u,M):
+    global kPrimes
+    global k
+    kPrimes = []
+    rand_state = gmpy2.random_state()
+    product = G(1)
+    countOfPrimes = G(0)
+    limit = count_primes(M)//2
+    while product <= 2*M*(maxProd(countOfPrimes)**2) and countOfPrimes<=limit:
+        print("MaxProd: ")
+        print(maxProd(countOfPrimes))
+        print([product,2*M*(maxProd(countOfPrimes)**2)])
+        r = gmpy2.mpz_random(rand_state,M)
+        if(gmpy2.is_prime(r,10) and r not in kPrimes):
+            kPrimes.append(r)
+            print(f'r in if condiition- {r}')
+            countOfPrimes=countOfPrimes+1
+            product = product * r
+    k = countOfPrimes 
+    print("MaxProd at the end: ")
+    print(maxProd(k))
 
+def count_primes(M):
+    count = G(0)
+    for num in range(2,M):
+        if gmpy2.is_prime(num):
+            count += 1
+    return count
+        
+
+
+def maxProd(count):
+    global kPrimes,u
+    kPrimes.sort(reverse = True)
+    print(f'kPrimes- {kPrimes}')
+    prod = 1
+    # print(u,count)
+    print(f'u,count- {[u,count]}')
+    l = gmpy2.rint_floor(u*count)
+    l = G(int(l))
+
+    print(l)
+    for i in range(0,l):
+        prod = prod*kPrimes[i]
+    return prod
 
 def ReedSolomonRecieve(residueRecieved,l):
     global M,kPrimes
@@ -194,7 +243,7 @@ def ReedSolomonRecieve(residueRecieved,l):
            index =i
            break
     if(r_list[i]%t_list[i]==0):
-        print(r_list[i]/t_list[i])
+        # print(r_list[i]/t_list[i])
         a = r_list[i]/t_list[i]
         print(a)
         # return True
@@ -203,22 +252,16 @@ def ReedSolomonRecieve(residueRecieved,l):
         # return False
 
 def Reed():
+    global u,M
     u = str(input("Error fraction- "))
     M = str(input("Bound- "))
+    u = gmpy2.mpfr(u)
+    M= G(M)
     GlobalSetup(u,M)
     while(1):
         a = str(input("Enter the number to transmit- "))
         residues = ReedSolomonSend(a)
         residuesRecieved,l = Transmit(residues)
         ReedSolomonRecieve(residuesRecieved,l)
-        
+
 Reed()
-        
-        
-        
-    
-    
-        
-    
-    
-            
